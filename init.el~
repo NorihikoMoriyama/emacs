@@ -1,0 +1,88 @@
+;; 言語を日本語にする
+(set-language-environment 'Japanese)
+;; 極力UTF-8とする
+(prefer-coding-system 'utf-8)
+
+;; load-path
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/elisp/"))
+
+
+;; auto-installの設定
+(when (require 'auto-install nil t)
+  (setq auto-install-directory "~/.emacs.d/elisp/")
+  (auto-install-update-emacswiki-package-name t)
+  (auto-install-compatibility-setup))
+
+
+;; package.elの設定
+(when (require 'package nil t)
+  ;; パッケージリポジトリにMarmaladeと開発者運営のELPAを追加
+  (add-to-list 'package-archives
+               '("marmalade" . "http://marmalade-repo.org/packages/"))
+  (add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/"))
+  ;; インストールしたパッケージにロードパスを通して読み込む
+  (package-initialize))
+
+
+;; anything
+(require 'anything-startup)
+;; kill-ring
+(setq anything-kill-ring-threshold 0)
+(global-set-key "\M-y" 'anything-show-kill-ring)
+
+
+;; popwin
+(require 'popwin)
+(setq display-buffer-function 'popwin:display-buffer)
+
+;; 入力の効率化
+(when (require 'auto-complete-config nil t)
+  (add-to-list 'ac-dictionary-directories 
+    "~/.emacs.d/elpa/ac-dict")
+  (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
+  (ac-config-default))
+
+
+
+;; undo
+(define-key global-map (kbd "C-z") 'undo)
+
+;; コメントアウト
+(define-key global-map "\C-c;" 'comment-region)
+
+;; コメント解除
+(define-key global-map "\C-c:" 'uncomment-region)
+
+;; インデント
+(define-key global-map "\C-ci" 'indent-region)
+
+;; 置換
+(define-key global-map "\C-cs" 'replace-string)
+
+;; 分割した画面間を+矢印で移動
+(setq windmove-wrap-around t)
+(global-set-key (kbd "C-c <left>")  'windmove-left)
+(global-set-key (kbd "C-c <right>") 'windmove-right)
+(global-set-key (kbd "C-c <up>")    'windmove-up)
+(global-set-key (kbd "C-c <down>")  'windmove-down)
+
+
+;; 分割した画面を入れ替える
+(defun swap-screen()
+  "Swap two screen,leaving cursor at current window."
+  (interactive)
+  (let ((thiswin (selected-window))
+        (nextbuf (window-buffer (next-window))))
+    (set-window-buffer (next-window) (window-buffer))
+    (set-window-buffer thiswin nextbuf)))
+(defun swap-screen-with-cursor()
+  "Swap two screen,with cursor in same buffer."
+  (interactive)
+  (let ((thiswin (selected-window))
+        (thisbuf (window-buffer)))
+    (other-window 1)
+    (set-window-buffer thiswin (window-buffer))
+    (set-window-buffer (selected-window) thisbuf)))
+(global-set-key [f2] 'swap-screen)
+(global-set-key [S-f2] 'swap-screen-with-cursor)
+
